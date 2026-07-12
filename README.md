@@ -25,10 +25,10 @@ If you use this code, please cite the accompanying manuscript:
   booktitle={2026 IEEE International Workshop on Signal Processing and Artificial Intelligence for Wireless Communications ({SPAWC})},
   year    = {2026},
   month = {Sep 6--9,},
-address = {Athens, Greece},
-pages ={1--5},
-note={arXiv:2604.12620 [eess.SP]}
-}`
+  address = {Athens, Greece},
+  pages ={1--5},
+  note={arXiv:2604.12620 [eess.SP]}
+}```
 
 ## License
 
