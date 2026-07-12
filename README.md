@@ -4,15 +4,15 @@ covariance learning via successive convex approximations
 ## Directory Structure
 
 ```
-repo-root/
+root/
 ├── AD_simul.py              functions for simulation
 ├── main_AD_simul.py         function to run the AD simulation in the SPAWC'26 paper
-├── src/                    source functions of the toolbox
-├──────base.py              contains the base class for covariance learning algorithms
-├──────methods/             CL-SCA algorithm and baseline CL-methods (CWO, MSBL, CLMP)
-├──────plotting/            scripts for plotting
-├──────data/                scripts for data generation 
-└── saved_results/          folder to save figures and json files after running `python main_AD_simul.py`
+├── src/                     source functions of the toolbox
+├──────base.py               contains the base class for covariance learning algorithms
+├──────methods/              CL-SCA algorithm and baseline CL-methods (CWO, MSBL, CLMP)
+├──────plotting/             scripts for plotting
+├──────data/                 scripts for data generation 
+└── saved_results/           folder to save figures,json files
 ```
 
 ## Citation
