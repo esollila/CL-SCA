@@ -12,8 +12,9 @@ repo-root/
 ├──────methods/             CL-SCA algorithm and baseline CL-methods (CWO, MSBL, CLMP)
 ├──────plotting/            scripts for plotting
 ├──────data/                scripts for data generation 
-└── saved_results/          folder to save figures and json files after running ``python main_AD_simul.py``
+└── saved_results/          folder to save figures and json files after running `python main_AD_simul.py`
 ```
+
 ## Citation
 
 If you use this code, please cite the accompanying manuscript:
@@ -28,7 +29,8 @@ If you use this code, please cite the accompanying manuscript:
   address = {Athens, Greece},
   pages ={1--5},
   note={arXiv:2604.12620 [eess.SP]}
-}```
+}
+```
 
 ## License
 
