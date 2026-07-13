@@ -1,5 +1,4 @@
 import numpy as np
-from torch.utils.data import Dataset
 
 #%%
 def gaussian_mm(N, M, unit_norm=True, rng=None):
@@ -65,7 +64,7 @@ def bernoulli_mm(L, N, unit_norm=True, p=0.5, rng=None):
 
 
 #%%
-class ActivityDetetionDataset(Dataset):
+class ActivityDetetionDataset:
     # For MMV model: Y = A X + E 
     def __init__(
         self,
