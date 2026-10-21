@@ -93,7 +93,7 @@ def plot_missdetection(
             import tikzplotlib # Requires matplotlib 3.7.0
             timestamp = datetime.now().strftime("%Y%m%d_%H%M") 
             filename = ylab.replace(" ", "_") 
-            tikzplotlib.save(f'tikz/{filename}_{titlestr}_{timestamp}.tex')
+            tikzplotlib.save(f'saved_results/tikz/{filename}_{titlestr}_{timestamp}.tex')
             #tikzplotlib.save("./tikz/spect.tex")    
         else: 
             plt.show()    
@@ -151,7 +151,7 @@ def plot_computation_times(tme, Klist,titlestr, methods=None, fignro=1,save_fig=
         if tikz:
             import tikzplotlib # Requires matplotlib 3.7.0
             timestamp = datetime.now().strftime("%Y%m%d_%H%M") 
-            tikzplotlib.save(f'tikz/CPU_ad_{titlestr}_{timestamp}.tex')
+            tikzplotlib.save(f'saved_results/tikz/CPU_ad_{titlestr}_{timestamp}.tex')
             #tikzplotlib.save("./tikz/spect.tex")    
         else: 
             plt.show()

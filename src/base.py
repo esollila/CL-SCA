@@ -125,34 +125,27 @@ class CLobject():
 
         return gamma     
 
-    def compute_KKT_loss(self, A,gam,RY):
+    def compute_KKT_loss(self, A, gam, SCM):
         
-        N, M = A.shape
-        I = np.eye(N, dtype=np.complex128)
+        M, N = A.shape
         sig = self.sig
-        sqrt_g = np.sqrt(gam)
-        W = A * sqrt_g  # (N, M)
-        SigmaY = sig * I + W @ W.conj().T  # (N, N)
+        W = A * np.sqrt(gam)
+        SigmaY = W @ W.conj().T
+        SigmaY.flat[::M + 1] += sig
         
-        # ensure diagonal is exactly real
-        SigmaY[np.diag_indices_from(SigmaY)] = np.real(SigmaY[np.diag_indices_from(SigmaY)])
-
-        # Solve SigmaY B = A for B (N, M) without forming inverse
-        cF = cho_factor(SigmaY, lower=True, check_finite=False, overwrite_a=False)
+        # Solve SigmaY B = A for B (M, N) without forming the inverse.
+        # SigmaY is rebuilt every iteration, so it is safe to overwrite it in place.
+        cF = cho_factor(SigmaY, lower=True, check_finite=False, overwrite_a=True)
         B = cho_solve(cF, A, check_finite=False)
 
-        # grad2[m] = Re(b_m^H RY b_m) =Re( a_m^H SigmaY^{-1} RY SigmaY^{-1} a_m) 
-        RY_B = RY @ B
-        grad2 = np.einsum('ij,ij->j', B.conj(), RY_B).real  # (M,)
-
-        # grad1[m] = Re(a_m^H B_m)
-        grad1 = np.einsum('ij,ij->j', A.conj(), B).real
-        #np.maximum(grad1, 1e-14, out=grad_den)  # clamp
-
-        gradient = grad1 - grad2 
-        v = gam - gradient 
-        delta = np.maximum(v, 0.0) - gam
-        KKTloss = np.linalg.norm(delta)
+        # Numerator and denominator for the gamma update
+        SCM_B = SCM @ B
+        e_n = np.einsum('ij,ij->j', B.conj(), SCM_B).real  # a' SigmaY^-1 RY SigmaY^-1 a
+        d_n = np.einsum('ij,ij->j', A.conj(), B).real      # Re(a_n^H SigmaY^-1 a_n)
+            
+        gradient = d_n - e_n
+        delta = np.maximum(gam - gradient, 0.0) - gam
+        err = np.linalg.norm(delta,ord=np.inf)
         
-        return gradient, KKTloss.item()
+        return gradient, err.item()
         

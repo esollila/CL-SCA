@@ -1,4 +1,4 @@
-# 
+
 import numpy as np
 import time
 import json
@@ -14,9 +14,10 @@ def clone_method(met):
    
 #%%
 def run_AD_monte_carlo_experiment(
-    CL,                             # dictionary of CL methods (like CLSCA, CWO)
-    SSR,                            # dictionary of SSR methods (like SOMP etc)
-    titlestr,                       
+    CL,
+    SSR,
+    CLmethods,
+    titlestr, 
     MC_iters=500,
     N=1000,                         # number of devices
     L=64,                           # pilot length
@@ -26,7 +27,7 @@ def run_AD_monte_carlo_experiment(
     SNRhigh=0,
 ):
     
-    methods = list(CL.keys()) + list(SSR.keys())
+    methods = CLmethods + list(SSR.keys())
     num_methods = len(methods)
 
     # ----------------------------
@@ -49,7 +50,7 @@ def run_AD_monte_carlo_experiment(
 
     # Try to log algorithm parameters if available in CL objects
     algo_params = {}
-    for m in list(CL.keys()):
+    for m in CLmethods:
         obj = CL[m]
         algo_params[m] = extract_simple_params(obj)
     for m in list(SSR.keys()):
@@ -73,9 +74,11 @@ def run_AD_monte_carlo_experiment(
         
         print(f"\n---- K = {K:3d}")
         base_rng = np.random.default_rng(0)
-
+       
         if "CLMP" in list(methods):
             CL["CLMP"].K = int(K) 
+        if "CLMP2" in list(methods):
+            CL["CLMP2"].K = int(K) 
         if "SNIHT" in list(methods):
             SSR["SNIHT"].K = int(K)
             
@@ -100,7 +103,8 @@ def run_AD_monte_carlo_experiment(
                 dataset=dataset,
                 K=K,
                 CL=CL,
-                SSR = SSR
+                SSR = SSR,
+                CLmethods=CLmethods,
             )
             
             # convert dict -> array in method order
@@ -121,7 +125,7 @@ def run_AD_monte_carlo_experiment(
 
 
 #%%
-def run_ActivityDetection_parallel(dataset, K, CL, SSR, n_jobs=-1):
+def run_ActivityDetection_parallel(dataset, K, CL, SSR, CLmethods, n_jobs=-1):
     """ 
     This function runs the activity detection for a given dataset, K, and methods 
     in CL and SSR. It returns the missdetection rate, probability of exact recovery, 
@@ -133,7 +137,7 @@ def run_ActivityDetection_parallel(dataset, K, CL, SSR, n_jobs=-1):
     available CPU cores.
     """
 
-    methods = list(CL.keys()) + list(SSR.keys())
+    methods = CLmethods + list(SSR.keys())
     
     cputme = {m: 0.0 for m in methods}
     md = {m: 0.0 for m in methods}
@@ -142,7 +146,7 @@ def run_ActivityDetection_parallel(dataset, K, CL, SSR, n_jobs=-1):
     total_samples = len(dataset)
 
     res_list = Parallel(n_jobs=n_jobs)(
-        delayed(process_one_sample)(i, dataset, K, CL,SSR)
+        delayed(process_one_sample)(i, dataset, K, CL,SSR,CLmethods) 
         for i in range(total_samples)
     )
 
@@ -163,17 +167,20 @@ def run_ActivityDetection_parallel(dataset, K, CL, SSR, n_jobs=-1):
 
 
 #%%
-def process_one_sample(idx, dataset, K, CL,SSR):
+def process_one_sample(idx, dataset, K, CL,SSR,CLmethods):
     Y, A, sup, S_K = dataset[idx]
     S = np.zeros((A.shape[1], Y.shape[1]), dtype=Y.dtype)
     S[sup,:] = S_K.copy()
-    M = Y.shape[1]
-    cov_m = (Y @ Y.conj().T) / M
+    cov_m = (Y @ Y.conj().T) / Y.shape[1]
 
     results = {}
-    for metname, met in CL.items():
-        
+    for metname in CLmethods:
+        met = CL[metname]
         met_clone = clone_method(met)  # ensure no cross-contamination of state
+        if hasattr(met_clone, "_rng"):
+            met_clone._rng = np.random.default_rng(idx)   # fresh, per-trial, reproducible
+        if hasattr(met_clone, "seed"):
+            met_clone.seed = idx
         t0 = time.perf_counter()
         met_clone.fit(A, cov_m)
         t1 = time.perf_counter()
@@ -229,8 +236,8 @@ def extract_simple_params(obj):
 
 
 #%%
-def run_ActivityDetection(dataset, K, CL,SSR):
-    methods = list(CL.keys()) + list(SSR.keys())
+def run_ActivityDetection(dataset, K, CL,SSR,CLmethods):
+    methods = CLmethods + list(SSR.keys())
 
     cputme = {m: 0.0 for m in methods}
     md = {m: 0.0 for m in methods}
@@ -243,10 +250,10 @@ def run_ActivityDetection(dataset, K, CL,SSR):
 
         S = np.zeros((A.shape[1], Y.shape[1]), dtype=Y.dtype)
         S[sup,:] = S_K
-        M = Y.shape[1]
-        cov_m = (Y @ Y.conj().T) / M
+        cov_m = (Y @ Y.conj().T) / Y.shape[1]
 
-        for metname, met in CL.items():
+        for metname in CLmethods:
+            met = CL[metname]
             t0 = time.perf_counter()
             met.fit(A, cov_m)
             t1 = time.perf_counter()
