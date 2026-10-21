@@ -20,8 +20,8 @@ root/
 If you use this code, please cite the accompanying manuscript:
 
 ```bibtex
-@inproceedings{ollila2026joint,
-  title   = {Efficient {SCA} Algorithms for Sparse Bayesian Learning},
+@article{{ollila2026efficient,
+  title   = {Efficient {SCA} Algorithms for Sparse {B}ayesian Learning},
   author  = {Ollila, Esa and Esfandiari, Majdoddin  and Palomar, Daniel P. and Wang, Xinjue},
   year    = {2026},
   pages ={1--13},
