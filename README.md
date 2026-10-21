@@ -6,7 +6,9 @@ covariance learning via successive convex approximations
 ```
 root/
 ├── AD_simul.py              functions for simulation
-├── main_AD_simul.py         function to run the AD simulation 
+├── main_AD_simul.py         function to run the AD simulation
+├── convergence_gap.py       function that reproduces the median objective gap figure
+├── convergence_runmin.py    function that reproduces the running minimum loss figure
 ├── src/                     source functions of the toolbox
 ├──────base.py               contains the base class for covariance learning algorithms
 ├──────methods/              CL-SCA/CP-FP/CL-Hyb algorithms and baseline CL-methods (CWO, MSBL, CLMP,CLMM)
